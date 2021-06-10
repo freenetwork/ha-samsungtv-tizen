@@ -197,7 +197,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 class SamsungTVDevice(MediaPlayerEntity):
     """Representation of a Samsung TV."""
 
-    def __init__(self, host, port, name, timeout, mac, uuid, update_method, update_custom_ping_url, source_list, app_list, channel_list, api_key, device_id, show_channel_number, broadcast, scan_app_http, is_frame_tv, show_logos):
+    def __init__(self, host, port, name, timeout, mac, uuid, update_method, update_custom_ping_url, source_list, app_list, channel_list, api_key, device_id, show_channel_number, broadcast, scan_app_http, is_frame_tv, show_logos, fix_2020):
         """Initialize the Samsung device."""
 
         # Save a reference to the imported classes
@@ -216,6 +216,8 @@ class SamsungTVDevice(MediaPlayerEntity):
         
         self._source = None
         self._source_list = json.loads(source_list)
+        
+        self._fix_2020 = fix_2020
         
         self._running_app = None
         if app_list is not None:
@@ -512,7 +514,10 @@ class SamsungTVDevice(MediaPlayerEntity):
                 try:
                     if command_type == "run_app":
                         #run_app(self, app_id, app_type='DEEP_LINK', meta_tag='')
-                        self._ws.run_app(payload)
+                        if self._fix_2020 is true:
+                            requests.post('http://{host}:8001/api/v2/applications/{value}'.format(host=self._host, value=payload), timeout=0.5)
+                        else:
+                            self._ws.run_app(payload)
                     else:
                         hold_delay = 0
                         source_keys = payload.split(",")
